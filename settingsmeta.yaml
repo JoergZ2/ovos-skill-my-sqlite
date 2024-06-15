@@ -1,0 +1,22 @@
+
+skillMetadata:
+  sections:
+    - name:  Database Settimgs
+      fields:
+        - name: db_path
+          type: text
+          label: Path to database starting from mycroft-core
+          value: ""
+          placeholder: ../databases
+        - name: db_filename_01
+          type: text
+          label: Database file name
+          label: File name 01
+          value: ""
+          placeholder: example_01.db
+        - name: db_filename_02
+          type: text
+          label: Database file name
+          label: File name 02
+          value: ""
+          placeholder: example_02.db
