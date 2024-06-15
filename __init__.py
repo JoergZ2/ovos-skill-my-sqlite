@@ -61,12 +61,12 @@ class MySqliteDatabaseAssistant(OVOSSkill):
             return
     
     def write_lastid(self, last_id):
-        with open('/ramdisk/mycroft/lastid','w') as lastid:
+        with open('/tmp/joergz2_sqlite_lastid','w') as lastid:
             lastid.write(str(last_id))
             lastid.close()
 
     def read_lastid(self):
-        with open('/ramdisk/mycroft/lastid','r') as lastid:
+        with open('/tmp/joergz2_sqlite_lastid','r') as lastid:
             last_id = lastid.readline()
             lastid.close()
             return last_id
@@ -74,7 +74,6 @@ class MySqliteDatabaseAssistant(OVOSSkill):
 ##Database functions    
     def check_tool_names_exact(self, tool):
         """Checks if a tool exists and returns the ID"""
-        tool = tool.replace("-","").replace(" ","")
         sql = """
         SELECT t_name, t_synonym, t_storage, t_place FROM tool WHERE t_name LIKE '"""+ '%' + tool.lower() + '%'+"""';
         """
@@ -219,7 +218,6 @@ class MySqliteDatabaseAssistant(OVOSSkill):
         '''Looks for a tool in column t_name. If search isn't successful\
             you are asked for looking in column t_synonym'''
         tool = message.data.get('tool')
-        tool = tool.replace("-","").replace(" ","")
         res = self.check_tool_names_exact(tool)
         if len(res) == 0:
             answer = self.ask_yesno('look.for.synonym', {'tool': tool})
