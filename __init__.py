@@ -33,6 +33,13 @@ class MySqliteDatabaseAssistant(OVOSSkill):
                                    no_gui_fallback=False)
 
     def initialize(self):
+        DEFAULT_SETTINGS = {
+        "__mycroft_skill_firstrun": false,
+        "db_path": "/absolute/path/to/db_folder",
+        "db_filename_01": "dbname.db",
+        "db_filename_02": ""
+        }
+        self.settings.merge(DEFAULT_SETTINGS, new_only=True)
         self.settings_change_callback = self.on_settings_changed
         self.on_settings_changed()
         self.con = sq.connect(self.db_adr, check_same_thread=False)
@@ -220,13 +227,12 @@ class MySqliteDatabaseAssistant(OVOSSkill):
         tool = message.data.get('tool')
         res = self.check_tool_names_exact(tool)
         if len(res) == 0:
-            answer = self.ask_yesno('look.for.synonym', {'tool': tool})
-            if answer == 'yes':
-                res = self.check_tool_synonyms(tool)
-                if len(res) == 0:
-                    self.speak_dialog('nosynonym', {'tool': tool})
-                else:
-                    self.make_utterance_from_synonym(res, tool)
+            self.speak_dialog('look.for.synonym')
+            res = self.check_tool_synonyms(tool)
+            if len(res) == 0:
+                self.speak_dialog('nosynonym', {'tool': tool})
+            else:
+                self.make_utterance_from_synonym(res, tool)
             else:
                 self.speak_dialog('no.tool.name')
                 return

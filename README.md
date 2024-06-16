@@ -10,6 +10,17 @@ Adding later (realy under construction, not working yet)
 * "Hey Mycroft, where is the (tool) Hammer"
 * "Hey Mycroft, do I have somethimg like a scriber"
 
+## Setup
+Before using the first time you have to edit file settings.json. you find it under ```~/.config/mycroft/skills/ovos-skill-my-sqlite.joergz2```. Please add the absolute path to database folder and a name for database file:
+```
+{
+    "__mycroft_skill_firstrun": false,
+    "db_path": "/absolute/path/to/database_folder/",
+    "db_filename_01": "tools.db",
+    "db_filename_02": ""
+}
+```
+
 ## Credits
 JoergZ2
 
