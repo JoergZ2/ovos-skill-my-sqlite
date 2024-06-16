@@ -14,7 +14,7 @@ from ovos_bus_client.session import SessionManager
 from ovos_utils import classproperty
 from ovos_utils.process_utils import RuntimeRequirements
 from ovos_utils.log import LOG
-#test
+##test
 
 class MySqliteDatabaseAssistant(OVOSSkill):
     def __init__(self):
@@ -231,11 +231,9 @@ class MySqliteDatabaseAssistant(OVOSSkill):
             res = self.check_tool_synonyms(tool)
             if len(res) == 0:
                 self.speak_dialog('nosynonym', {'tool': tool})
+                self.speak_dialog('no.tool.name')
             else:
                 self.make_utterance_from_synonym(res, tool)
-            else:
-                self.speak_dialog('no.tool.name')
-                return
         else:
             self.make_utterance(res, tool)
 
