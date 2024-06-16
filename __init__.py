@@ -227,7 +227,7 @@ class MySqliteDatabaseAssistant(OVOSSkill):
         tool = message.data.get('tool')
         res = self.check_tool_names_exact(tool)
         if len(res) == 0:
-            self.speak_dialog('look.for.synonym')
+            self.speak_dialog('look.for.synonym',{'tool': tool})
             res = self.check_tool_synonyms(tool)
             if len(res) == 0:
                 self.speak_dialog('nosynonym', {'tool': tool})
