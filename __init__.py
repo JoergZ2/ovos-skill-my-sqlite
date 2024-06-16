@@ -34,7 +34,7 @@ class MySqliteDatabaseAssistant(OVOSSkill):
 
     def initialize(self):
         DEFAULT_SETTINGS = {
-        "__mycroft_skill_firstrun": false,
+        "__mycroft_skill_firstrun": "false",
         "db_path": "/absolute/path/to/db_folder",
         "db_filename_01": "dbname.db",
         "db_filename_02": ""
