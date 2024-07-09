@@ -14,7 +14,6 @@ from ovos_bus_client.session import SessionManager
 from ovos_utils import classproperty
 from ovos_utils.process_utils import RuntimeRequirements
 from ovos_utils.log import LOG
-##test
 
 class MySqliteDatabaseAssistant(OVOSSkill):
     def __init__(self):
@@ -33,39 +32,64 @@ class MySqliteDatabaseAssistant(OVOSSkill):
                                    no_gui_fallback=False)
 
     def initialize(self):
-        DEFAULT_SETTINGS = {
-        "__mycroft_skill_firstrun": "false",
-        "db_path": "/absolute/path/to/db_folder",
-        "db_filename_01": "dbname.db",
-        "db_filename_02": ""
-        }
-        self.settings.merge(DEFAULT_SETTINGS, new_only=True)
         self.settings_change_callback = self.on_settings_changed
         self.on_settings_changed()
-        self.con = sq.connect(self.db_adr, check_same_thread=False)
-        self.cursor = self.con.cursor()
+        self.data_dir = self.settings.get('data_dir', None)
 
 
     def on_settings_changed(self):
-        self.db_path = self.settings.get('db_path')
-        self.db_file_01 = self.settings.get('db_filename_01')
-        self.db_file_02 = self.settings.get('db_filename_02')
-        self.db_adr = self.db_path + '/' + self.db_file_01
-    
-    def execute_sql(self, sql, tool=None, last_id=None):
+        self.data_dir = self.settings.get('data_dir')
+        self.db_file = self.settings.get('db_file')
+
+    def check_if_path_and_db_exists(self,db_file=None):
+        if db_file == None or db_file == "not set":
+            self.speak_dialog('create.database.default')
+            user_dir = os.path.expanduser("~")
+            data_dir = os.path.join(user_dir, "databases")
+            db_file = os.path.join(data_dir,"objects.db")
+            if not os.path.isdir(data_dir):
+                os.makedirs(data_dir)
+            self.settings["db_file"] = db_file
+            self.settings["data_dir"] = data_dir
+            self.settings.store()
+            self.db_file = self.settings.get('db_file', None)
+            self.create_database(db_file)
+            self.con = sq.connect(self.db_file, check_same_thread=False)
+            return True
+        else:
+            return True
+
+    def create_database(self, db_file):
         try:
+            self.con = sq.connect(db_file, check_same_thread=False)
+            self.cursor = self.con.cursor()
+            sql = """CREATE TABLE items (key INTEGER PRIMARY KEY AUTOINCREMENT,t_name TEXT NOT NULL,t_synonym TEXT,t_storage TEXT,t_place TEXT)"""
             self.cursor.execute(sql)
             self.con.commit()
-            if "INSERT" in sql:
-                last_id = self.cursor.lastrowid
-                self.write_lastid(last_id)
-                self.speak_dialog('insert.succesfull', {'tool': tool})
-            if "UPDATE" in sql:
-                self.speak_dialog('update.succesfull',{'last_id': last_id})
+            LOG.info(f"Database created! Path and file name {db_file}")
         except sq.OperationalError as e:
-            LOG.info(e)
-            self.speak_dialog('no_database',{'database': self.db_file_01})
-            return
+            LOG.info("Error: " + str(e))
+            self.speak_dialog('no_database',{'database': self.db_file})
+            pass
+
+    def execute_sql(self, sql, item=None, last_id=None):
+        if self.check_if_path_and_db_exists(db_file=self.db_file):
+            try:
+                self.cursor = self.con.cursor()
+                self.cursor.execute(sql)
+                self.con.commit()
+                if "INSERT" in sql:
+                    last_id = self.cursor.lastrowid
+                    self.write_lastid(last_id)
+                    self.speak_dialog('insert.succesfull', {'item': item})
+                if "UPDATE" in sql:
+                    self.speak_dialog('update.succesfull',{'last_id': last_id})
+            except sq.OperationalError as e:
+                LOG.info("Datenbankfehler: " + str(e))
+                self.speak_dialog('no_database',{'database': self.db_file})
+                return
+        else:
+            pass
     
     def write_lastid(self, last_id):
         with open('/tmp/joergz2_sqlite_lastid','w') as lastid:
@@ -79,128 +103,121 @@ class MySqliteDatabaseAssistant(OVOSSkill):
             return last_id
 
 ##Database functions    
-    def check_tool_names_exact(self, tool):
-        """Checks if a tool exists and returns the ID"""
+    def check_item_names_exact(self, item):
+        """Checks if an item exists and returns the ID"""
         sql = """
-        SELECT t_name, t_synonym, t_storage, t_place FROM tool WHERE t_name LIKE '"""+ '%' + tool.lower() + '%'+"""';
+        SELECT t_name, t_synonym, t_storage, t_place FROM items WHERE t_name LIKE '"""+ '%' + item.lower() + '%'+"""';
         """
-        self.execute_sql(sql, tool)
+        self.execute_sql(sql, item)
         res = self.cursor.fetchall()
         return res
     
-    def check_tool_names_raw(self, tool):
-        """Checks if a tool exists and returns the ID"""
+    def check_item_names_raw(self, item):
+        """Checks if an item exists and returns the ID"""
         sql = """
-        SELECT t_name, t_synonym, t_storage, t_place FROM tool WHERE t_name LIKE '"""+ '%' + tool.lower() + '%'+"""';
+        SELECT t_name, t_synonym, t_storage, t_place FROM items WHERE t_name LIKE '"""+ '%' + item.lower() + '%'+"""';
         """
         self.execute_sql(sql)
         res = self.cursor.fetchall()
         return res
     
 
-    def check_tool_synonyms(self, tool):
-        """Checks if a tool exists and returns the ID"""
+    def check_item_synonyms(self, item):
+        """Checks if an item exists and returns the ID"""
         sql = """
-        SELECT t_name, t_synonym, t_storage, t_place FROM tool WHERE t_synonym LIKE '"""+ '%' + tool.lower() + '%'+"""';
+        SELECT t_name, t_synonym, t_storage, t_place FROM items WHERE t_synonym LIKE '"""+ '%' + item.lower() + '%'+"""';
         """
         self.execute_sql(sql)
         res = self.cursor.fetchall()
         return res
     
-    def insert_new_tool(self, tool, synonym, storage, place):
-        stored_tool = self.check_tool_names_exact(tool)
-        tool, synonym, storage, place = self.make_lower(tool, synonym, storage, place)
+    def insert_new_item(self, item, synonym, storage, place):
+        stored_item = self.check_item_names_exact(item)
+        item, synonym, storage, place = self.make_lower(item, synonym, storage, place)
         sql = """
-            INSERT INTO tool (key, t_name, t_synonym, t_storage, t_place) VALUES \
-                (NULL, '""" + tool +"""', '""" + synonym + """', '""" + storage +"""',\
+            INSERT INTO items (key, t_name, t_synonym, t_storage, t_place) VALUES \
+                (NULL, '""" + item +"""', '""" + synonym + """', '""" + storage +"""',\
                  '""" + place +"""');
             """
-        self.execute_sql(sql, tool=tool)
+        self.execute_sql(sql, item=item)
         #else:
-            #self.speak_dialog('tool.is.stored', {'tool': tool})
+            #self.speak_dialog('item.is.stored', {'item': item})
 
-    def insert_single_tool(self, tool):
-        stored_tool = self.check_tool_names_exact(tool)
+    def insert_single_item(self, item):
+        stored_item = self.check_item_names_exact(item)
         sql = """
-            INSERT INTO tool (key, t_name) VALUES \
-                (NULL, '""" + tool.lower() +"""');
+            INSERT INTO items (key, t_name) VALUES \
+                (NULL, '""" + item.lower() +"""');
             """
-        self.execute_sql(sql, tool)
+        self.execute_sql(sql, item)
 
     def update_last_insert(self, column, value):
         last_id = self.read_lastid()
         sql = """
-            UPDATE tool set '""" + column + """' = '""" + value + """' where key = '""" + last_id + """';
+            UPDATE items set '""" + column + """' = '""" + value + """' where key = '""" + last_id + """';
             """
         self.execute_sql(sql, last_id=last_id)
 
 ## Helper functions
 #Formatting data tuples to speech
-    def make_utterance(self, res, tool):
+    def make_utterance(self, res, item):
         if len(res) == 0:
-            self.speak_dialog('notool', {'tool': tool})
+            self.speak_dialog('noitem', {'item': item})
         else:
             i = 0
             while i < len(res):
-                tool = res[i][0]
+                item = res[i][0]
                 storage = res[i][2]
                 place = res[i][3]
-                self.speak_dialog('tool.is.in', {'tool': tool, 'storage': storage, 'place': place})
+                self.speak_dialog('item.is.in', {'item': item, 'storage': storage, 'place': place})
                 i += 1
 
-    def make_utterance_from_synonym(self, res, tool):
+    def make_utterance_from_synonym(self, res, item):
         if len(res) == 0:
-            self.speak_dialog('notool', {'tool': tool})
+            self.speak_dialog('noitem', {'item': item})
         else:
             i = 0
             while i < len(res):
-                tool = res[i][0]
+                item = res[i][0]
                 synonym = res[i][1]
                 storage = res[i][2]
                 place = res[i][3]
-                self.speak_dialog('synonym.is.in', {'tool': tool, 'synonym': synonym, 'storage': storage, 'place': place})
+                self.speak_dialog('synonym.is.in', {'item': item, 'synonym': synonym, 'storage': storage, 'place': place})
                 time.sleep(1)
                 i += 1
 
-    def make_lower(self, tool, synonym, storage, place):
-        if tool != None or tool != "":
-            tool = tool.lower()
+    def make_lower(self, item, synonym, storage, place):
+        if item != None or item != "":
+            item = item.lower()
         if synonym != None or synonym != "":
             synonym = synonym.lower()
         if storage != None or storage != "":
             storage = storage.lower()
         if place != None or place != "":
             place = place.lower()
-        return tool, synonym, storage, place
+        return item, synonym, storage, place
         
         
         
 
 ##Intent handlers
-    @intent_handler('test.dialog.intent')
-    def handle_test(self):
-        response = self.get_response('test.response')
-        self.speak("Die Antwort lautet ja.")
-        self.speak_dialog('response', {'response': response})
-
-#Deactivated cause it wont work with hivemind
-    @intent_handler('insert.tool.intent')
-    def handle_insert_tool(self):
-        tool = self.get_response('insert.tool.name',num_retries=0)
-        #time.sleep(2)
-        synonym = self.get_response('insert.tool.synonym',num_retries=0)
+    @intent_handler('insert.item.intent')
+    def handle_insert_item(self):
+        item = self.get_response('insert.item.name',num_retries=0)
+        synonym = self.get_response('insert.item.synonym',num_retries=0)
         if synonym == None:
             synonym = " "
-        #time.sleep(2)
-        storage = self.get_response('insert.tool.storage',num_retries=0)
-        #time.sleep(2)
-        place = self.get_response('insert.tool.place',num_retries=0)
-        self.insert_new_tool(tool, synonym, storage, place)
+        storage = self.get_response('insert.item.storage',num_retries=0)
+        place = self.get_response('insert.item.place',num_retries=0)
+        self.insert_new_item(item, synonym, storage, place)
 
-#    @intent_handler('insert.single.tool.intent')
-#    def handle_insert_single_tool(self, message):
-#        tool = message.data.get('tool')
-#        self.insert_single_tool(tool)
+    @intent_handler('insert.item.complete.intent')
+    def handle_insert_item_completely(self, message):
+        item = message.data.get('item')
+        synonym = message.data.get('synonym')
+        storage = message.data.get('storage')
+        place = message.data.get('place')
+        self.insert_new_item(item, synonym, storage, place)
 
     @intent_handler('add.synonym.intent')
     def handle_synonym(self, message):
@@ -220,23 +237,22 @@ class MySqliteDatabaseAssistant(OVOSSkill):
         column = "t_place"
         self.update_last_insert(column,loc_two)
 
-    @intent_handler('find.tool.intent')
-    def handle_find_tool(self, message):
-        '''Looks for a tool in column t_name. If search isn't successful\
+    @intent_handler('find.item.intent')
+    def handle_find_item(self, message):
+        '''Looks for an item in column t_name. If search isn't successful\
             you are asked for looking in column t_synonym'''
-        tool = message.data.get('tool')
-        res = self.check_tool_names_exact(tool)
+        item = message.data.get('item')
+        res = self.check_item_names_exact(item)
         if len(res) == 0:
-            self.speak_dialog('look.for.synonym',{'tool': tool})
-            res = self.check_tool_synonyms(tool)
+            self.speak_dialog('look.for.synonym',{'item': item})
+            res = self.check_item_synonyms(item)
             if len(res) == 0:
-                self.speak_dialog('nosynonym', {'tool': tool})
-                self.speak_dialog('no.tool.name')
+                self.speak_dialog('nosynonym', {'item': item})
+                self.speak_dialog('no.item.name')
             else:
-                self.make_utterance_from_synonym(res, tool)
+                self.make_utterance_from_synonym(res, item)
         else:
-            self.make_utterance(res, tool)
+            self.make_utterance(res, item)
 
 def create_skill():
     return MySqliteDatabaseAssistant()
-
