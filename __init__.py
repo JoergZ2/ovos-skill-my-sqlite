@@ -75,6 +75,7 @@ class MySqliteDatabaseAssistant(OVOSSkill):
     def execute_sql(self, sql, item=None, last_id=None):
         if self.check_if_path_and_db_exists(db_file=self.db_file):
             try:
+                self.con = sq.connect(self.db_file, check_same_thread=False)
                 self.cursor = self.con.cursor()
                 self.cursor.execute(sql)
                 self.con.commit()
@@ -217,6 +218,7 @@ class MySqliteDatabaseAssistant(OVOSSkill):
         synonym = message.data.get('synonym')
         storage = message.data.get('storage')
         place = message.data.get('place')
+        LOG.info(f"Gehört:  {item}, {synonym}, {storage} und {place}.")
         self.insert_new_item(item, synonym, storage, place)
 
     @intent_handler('add.synonym.intent')
@@ -256,3 +258,4 @@ class MySqliteDatabaseAssistant(OVOSSkill):
 
 def create_skill():
     return MySqliteDatabaseAssistant()
+

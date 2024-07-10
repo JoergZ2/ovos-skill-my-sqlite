@@ -1,0 +1,6 @@
+i cannot find the {item} tool.
+i cannot find the tool {item}.
+i cannot find the object {item}.
+the tool {item} does not exist in the database.
+the item {item} does not exist in the database.
+the object {item} does not exist in the database.

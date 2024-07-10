@@ -1,1 +1,3 @@
-Kein werkzeug mit einem namen wie {tool} ist in der Datenbank zu finden.
+Kein werkzeug  mit einem namen wie {item} ist in der Datenbank zu finden.
+Keinen gegenstand  mit einem namen wie {item} ist in der Datenbank zu finden.
+Kein  objekt mit einem namen wie {item} ist in der Datenbank zu finden.

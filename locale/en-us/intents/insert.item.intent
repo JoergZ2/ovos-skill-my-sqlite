@@ -1,0 +1,2 @@
+(add | capture | enter) (tool | item | object)
+new (tool | item | object) (capture | create | register | enter)

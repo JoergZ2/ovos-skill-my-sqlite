@@ -1,0 +1,4 @@
+complete recording (tool | object | item) {item} {synonym} {storage} {place}
+complete acquisition (tool | object | item) {item} {synonym} {storage} {place}
+(acquisition | recording) without dialog name {item} or {synonym} location {storage} place {place}
+Quick capture (tool | object | item) name {item} or {synonym} location {storage} place {place}
