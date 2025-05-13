@@ -59,7 +59,9 @@ class MySqliteDatabaseAssistant(OVOSSkill):
         try:
             self.con = sq.connect(db_file, check_same_thread=False)
             self.cursor = self.con.cursor()
-            sql = """CREATE TABLE items (key INTEGER PRIMARY KEY AUTOINCREMENT,t_name TEXT NOT NULL,t_synonym TEXT,t_storage TEXT,t_place TEXT)"""
+            sql = """
+            CREATE TABLE items (key INTEGER PRIMARY KEY AUTOINCREMENT,t_name TEXT NOT NULL,t_synonym TEXT,t_storage TEXT,t_place TEXT)
+            """
             self.cursor.execute(sql)
             self.con.commit()
             LOG.info(f"Database created! Path and file name {db_file}")
