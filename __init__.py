@@ -1,5 +1,3 @@
-from ovos_backend_client.api import DeviceApi
-#from mycroft.api import DeviceApi
 import lingua_franca
 import sys
 import os
