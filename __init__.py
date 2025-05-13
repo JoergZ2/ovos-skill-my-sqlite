@@ -6,7 +6,7 @@ import os
 import time
 import sqlite3 as sq
 from os.path import dirname, isfile
-#from ovos_utils import classproperty
+from ovos_utils import classproperty
 from ovos_utils.log import LOG
 from ovos_utils.process_utils import RuntimeRequirements
 from ovos_workshop.decorators import intent_handler
