@@ -1,0 +1,2 @@
+[ovos.plugin.skill]
+ovos-skill-my-sqlite.joergz2 = ovos_skill_my_sqlite: MySqliteDatabaseAssistant

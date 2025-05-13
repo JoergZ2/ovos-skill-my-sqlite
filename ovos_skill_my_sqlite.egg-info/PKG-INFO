@@ -1,0 +1,11 @@
+Metadata-Version: 2.1
+Name: ovos-skill-my-sqlite
+Version: 0.0.1
+Summary: Skill to control a simple sqlite database for tools and other things
+Home-page: https://github.com/JoergZ2/ovos-skill-my-sqlite
+Author: JoergZ2
+Author-email: 
+License: Apache2.0
+Keywords: ovos skill plugin
+License-File: LICENSE
+License-File: LICENSE.md

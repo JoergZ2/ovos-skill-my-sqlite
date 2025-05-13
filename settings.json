@@ -1,5 +1,6 @@
 {
     "__mycroft_skill_firstrun": false,
-    "data_dir": "/home/ovos/databases/",
-    "db_file": "not set"
+    "db_path": "/home/ovos/databases/",
+    "db_filename_01": "tools.db",
+    "db_filename_02": ""
 }

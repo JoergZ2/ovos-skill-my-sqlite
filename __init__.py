@@ -6,14 +6,12 @@ import os
 import time
 import sqlite3 as sq
 from os.path import dirname, isfile
-from adapt.intent import IntentBuilder
-from mycroft.skills import intent_handler
-from ovos_workshop.skills import OVOSSkill
-from mycroft.util import play_audio_file
-from ovos_bus_client.session import SessionManager
-from ovos_utils import classproperty
-from ovos_utils.process_utils import RuntimeRequirements
+#from ovos_utils import classproperty
 from ovos_utils.log import LOG
+from ovos_utils.process_utils import RuntimeRequirements
+from ovos_workshop.decorators import intent_handler
+from ovos_workshop.skills import OVOSSkill
+from ovos_bus_client.session import SessionManager
 
 class MySqliteDatabaseAssistant(OVOSSkill):
     def __init__(self):
