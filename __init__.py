@@ -1,4 +1,3 @@
-import lingua_franca
 import sys
 import os
 import time
