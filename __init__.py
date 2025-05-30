@@ -11,8 +11,9 @@ from ovos_workshop.skills import OVOSSkill
 from ovos_bus_client.session import SessionManager
 
 class MySqliteDatabaseAssistant(OVOSSkill):
-    def __init__(self):
-        super(MySqliteDatabaseAssistant, self).__init__(name="My SQLite Database Assistant")
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.override = True
 
     @classproperty
     def runtime_requirements(self):
