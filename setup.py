@@ -7,7 +7,7 @@ from os import walk, path
 # TODO update this info!
 # Define package information
 SKILL_CLAZZ = " MySqliteDatabaseAssistant"  # Make sure it matches __init__.py class name
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 URL = "https://github.com/JoergZ2/ovos-skill-my-sqlite"
 AUTHOR = "JoergZ2"
 EMAIL = ""
