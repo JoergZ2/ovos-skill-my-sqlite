@@ -36,13 +36,14 @@ class MySqliteDatabaseAssistant(OVOSSkill):
     def on_settings_changed(self):
         self.data_dir = self.settings.get('data_dir')
         self.db_file = self.data_dir + "/" + self.settings.get('db_file')
-        LOG.info("Db path and file: " + str(self.db_file))
+        LOG.debug("Db path and file: " + str(self.db_file))
 
     def check_if_path_and_db_exists(self,db_file=None):
         if db_file == None or db_file == "not set":
             self.speak_dialog('create.database.default')
             user_dir = os.path.expanduser("~")
-            data_dir = os.path.join(user_dir, "databases")
+            data_dir = os.path.join(user_dir, ".local/share/mycroft/databases")
+            LOG.debug("Data_dir: ")
             db_file = os.path.join(data_dir,"objects.db")
             if not os.path.isdir(data_dir):
                 os.makedirs(data_dir)
@@ -72,9 +73,9 @@ class MySqliteDatabaseAssistant(OVOSSkill):
             pass
 
     def execute_sql(self, sql, item=None, last_id=None):
-        LOG.info("db file: " + str(self.db_file))
+        LOG.debug("db file: " + str(self.db_file))
         if self.check_if_path_and_db_exists(db_file=self.db_file):
-            LOG.info("db file: " + str(self.db_file))
+            LOG.debug("db file: " + str(self.db_file))
             try:
                 self.con = sq.connect(self.db_file, check_same_thread=False)
                 self.cursor = self.con.cursor()
@@ -219,7 +220,7 @@ class MySqliteDatabaseAssistant(OVOSSkill):
         synonym = message.data.get('synonym')
         storage = message.data.get('storage')
         place = message.data.get('place')
-        LOG.info(f"Gehört:  {item}, {synonym}, {storage} und {place}.")
+        LOG.debug(f"Gehört:  {item}, {synonym}, {storage} und {place}.")
         self.insert_new_item(item, synonym, storage, place)
 
     @intent_handler('add.synonym.intent')
