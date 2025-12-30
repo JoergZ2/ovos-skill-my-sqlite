@@ -74,6 +74,7 @@ class MySqliteDatabaseAssistant(OVOSSkill):
     def execute_sql(self, sql, item=None, last_id=None):
         LOG.info("db path: " + str(self.db_path))
         if self.check_if_path_and_db_exists(db_file=self.db_file):
+            LOG.info("db file: " + str(self.db_file))
             try:
                 self.con = sq.connect(self.db_file, check_same_thread=False)
                 self.cursor = self.con.cursor()
