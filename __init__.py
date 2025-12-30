@@ -36,6 +36,7 @@ class MySqliteDatabaseAssistant(OVOSSkill):
     def on_settings_changed(self):
         self.data_dir = self.settings.get('data_dir')
         self.db_file = self.settings.get('db_file')
+        LOG.info("Db path and file: ", self.data_dir, self.db_file)
 
     def check_if_path_and_db_exists(self,db_file=None):
         if db_file == None or db_file == "not set":
