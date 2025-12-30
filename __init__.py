@@ -72,7 +72,7 @@ class MySqliteDatabaseAssistant(OVOSSkill):
             pass
 
     def execute_sql(self, sql, item=None, last_id=None):
-        LOG.info("db path: " + str(self.db_path))
+        LOG.info("db file: " + str(self.db_file))
         if self.check_if_path_and_db_exists(db_file=self.db_file):
             LOG.info("db file: " + str(self.db_file))
             try:
